@@ -25,6 +25,14 @@
 
   <h3 id="tobeedited">To be edited</h3>
 
+  <script>
+    new S2.UI.InPlaceEditor("tobeedited",
+      "fixtures/controls_in_place_editor_result.html", {
+        //override so we can use a static for the result
+        ajaxOptions: { method: "get" }
+    });
+  </script>
+
   <h2>In Place Editor with Blur</h2>
 
   <h3 id="tobeeditedblur">To be edited w/ blur</h3>

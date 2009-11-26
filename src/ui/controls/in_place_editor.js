@@ -14,11 +14,12 @@
      *
      *  Instantiates an in place editor.
     **/
-    initialize: function (element, options) {
+    initialize: function (element, url, options) {
       this.element = $(element);
       var opt = this.setOptions(options);
 
       UI.addClassNames(this.element, 'ui-widget ui-inplaceeditor');
+      UI.addBehavior(this.element, UI.Behavior.Hover);
 
       this.addObservers();
     },
@@ -26,7 +27,7 @@
     addObservers: function () {
     },
 
-    destroy: function () {
+    removeObservers: function () {
     }
 
   });
