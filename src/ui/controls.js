@@ -10,3 +10,4 @@
 //= require "controls/progress_bar"
 //= require "controls/menu"
 //= require "controls/autocompleter"
+//= require "controls/in_place_editor"
