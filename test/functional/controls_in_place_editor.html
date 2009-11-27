@@ -26,8 +26,14 @@
 
   <p id="tobeedited">To be edited</p>
 
-  <div class="description"><p>A standard in place editor with all the default 
-  options.</p></div>
+  <div class="description">
+    <p>A standard in place editor with all the default options.</p>
+    <ul>
+      <li>It <strong>should</strong> have a "hover" state.</li>
+      <li>It <strong>should</strong> execute the <code>onEnterHover</code> callback when the mouse enters and it is not in edit mode.</li>
+      <li>It <strong>should</strong> execute the <code>onLeaveHover</code> callback when the mouse leaves and it is not in edit mode.</li>
+    </ul>
+  </div>
 
   <script>
     editors.unshift(new S2.UI.InPlaceEditor("tobeedited",

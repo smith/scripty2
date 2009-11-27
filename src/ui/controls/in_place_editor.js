@@ -18,21 +18,21 @@
       this.element = $(element);
       var opt = this.setOptions(options);
 
-      this.element.writeAttribute("contentEditable", "true");
-      UI.addClassNames(this.element, 'ui-widget ui-inplaceeditor');
-      UI.addBehavior(this.element, UI.Behavior.Hover);
+      this._editing = false;
+      this._saving = false;
+      this.observers = {
+        mouseenter: this._mouseenter.bind(this),
+        mouseleave: this._mouseleave.bind(this),
+        click: this._click.bind(this)
+      };
+      this.element.store(this.NAME, this);
       this.element.store("originalBackground",
         S2.CSS.colorFromString(this.element.getStyle("background-color"))
       );
 
-      this.observers = {
-        mouseenter: this._mouseenter.bind(this),
-        mouseleave: this._mouseleave.bind(this)
-      };
-
+      UI.addClassNames(this.element, 'ui-widget ui-inplaceeditor');
+      UI.addBehavior(this.element, UI.Behavior.Hover);
       this.addObservers();
-
-      this.element.store(this.NAME, this);
     },
 
     addObservers: function () {
@@ -45,16 +45,16 @@
     },
 
     _mouseenter: function () {
-      this.options.onEnterHover(this);
+      if (!this._editing) { this.options.onEnterHover(this); }
     },
 
     _mouseleave: function () {
-      this.options.onLeaveHover(this);
+      if (!this._editing) { this.options.onLeaveHover(this); }
     }
-  });
 
-  Object.extend(UI.InPlaceEditor.prototype, {
-    dispose : UI.InPlaceEditor.prototype.destroy
+    _click: function () {
+
+    }
   });
 
   Object.extend(UI.InPlaceEditor, {
@@ -85,13 +85,13 @@
       textAfterControls: '',
       textBeforeControls: '',
       textBetweenControls: '',
-      onEnterHover: function (ipe) {
-        ipe.element.morph("background-color:" + ipe.options.highlightColor);
+      onEnterHover: function (instance) {
+        instance.element.morph("background-color:" +
+          instance.options.highlightColor);
       },
-      onLeaveHover: function (ipe) {
-        ipe.element.morph("background-color:" +
-          (ipe.options.highlightEndColor ||
-           ipe.element.retrieve("originalBackground")));
+      onLeaveHover: function (instance) {
+        instance.element.morph("background-color:" +
+          instance.element.retrieve("originalBackground"));
       }
     }
   });
