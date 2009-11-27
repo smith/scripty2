@@ -18,18 +18,39 @@
       this.element = $(element);
       var opt = this.setOptions(options);
 
+      this.element.writeAttribute("contentEditable", "true");
       UI.addClassNames(this.element, 'ui-widget ui-inplaceeditor');
       UI.addBehavior(this.element, UI.Behavior.Hover);
+      this.element.store("originalBackground",
+        S2.CSS.colorFromString(this.element.getStyle("background-color"))
+      );
+
+      this.observers = {
+        mouseenter: this._mouseenter.bind(this),
+        mouseleave: this._mouseleave.bind(this)
+      };
 
       this.addObservers();
+
+      this.element.store(this.NAME, this);
     },
 
     addObservers: function () {
+      for (var o in this.observers) { if (this.observers.hasOwnProperty(o)) {
+        this.element.observe(o, this.observers[o]);
+      }}
     },
 
     removeObservers: function () {
-    }
+    },
 
+    _mouseenter: function () {
+      this.options.onEnterHover(this);
+    },
+
+    _mouseleave: function () {
+      this.options.onLeaveHover(this);
+    }
   });
 
   Object.extend(UI.InPlaceEditor.prototype, {
@@ -49,8 +70,6 @@
       formClassName: 'ui-inplaceeditor-form',
       formId: null,                        // id|elt
       highlightColor: '#ffff99',
-      highlightEndColor: '#ffffff',
-      hoverClassName: '',
       htmlResponse: true,
       loadingClassName: 'ui-inplaceeditor-loading',
       loadingText: 'Loading...',
@@ -65,7 +84,15 @@
       submitOnBlur: false,
       textAfterControls: '',
       textBeforeControls: '',
-      textBetweenControls: ''
+      textBetweenControls: '',
+      onEnterHover: function (ipe) {
+        ipe.element.morph("background-color:" + ipe.options.highlightColor);
+      },
+      onLeaveHover: function (ipe) {
+        ipe.element.morph("background-color:" +
+          (ipe.options.highlightEndColor ||
+           ipe.element.retrieve("originalBackground")));
+      }
     }
   });
 
