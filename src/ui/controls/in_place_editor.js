@@ -29,6 +29,7 @@
       this.element.store("originalBackground",
         S2.CSS.colorFromString(this.element.getStyle("background-color"))
       );
+      this.element.writeAttribute("title", opt.clickToEditText);
 
       UI.addClassNames(this.element, 'ui-widget ui-inplaceeditor');
       UI.addBehavior(this.element, UI.Behavior.Hover);
@@ -50,7 +51,7 @@
 
     _mouseleave: function () {
       if (!this._editing) { this.options.onLeaveHover(this); }
-    }
+    },
 
     _click: function () {
 
