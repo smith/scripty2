@@ -56,10 +56,13 @@
       if (Object.isElement(this._form)) {
         this._form.stopObserving("submit", this._submit.bind(this));
       }
-      // TODO: controls
+      if (Object.isElement(this._editor)) {
+        this._editor.stopObserving("blur", this._submit.bind(this));
+      }
+      // TODO: stop observing controls
     },
 
-   /**
+    /**
     **/
     getText: function () {
       return this._text.unescapeHTML();
@@ -70,7 +73,7 @@
     edit: function (event) {
       var result, externalControl = this.options.externalControl;
       if (this._editing || this._saving) { return; }
-      result = this.element.fire("ui:inplaceeditor:edit", {
+      result = this.element.fire("ui:inplaceeditor:enter", {
         inPlaceEditor : this
       });
       if (!result.stopped) {
@@ -85,10 +88,41 @@
       if (event) { event.stop(); }
     },
 
-     /**
-     **/
+    /**
+    **/
+    stopEditing: function (event) {
+      var result;
+      if (!this._editing) { return; }
+      result = this.element.fire("ui:inplaceeditor:leave", {
+        inPlaceEditor : this
+      });
+      if (!result.stopped) {
+          this._editing = false;
+          this._form.remove();
+          this.element.show();
+      }
+
+      if (event) { event.stop(); }
+    },
+
+    /**
+    **/
     save: function (event) {
-      // TODO
+      var result = this.element.fire("ui:inplaceeditor:before:save", {
+        inPlaceEditor : this
+      });
+      if (!result.stopped) {
+        // TODO
+        this.stopEditing();
+        this.element.update(this.options.savingText);
+        this.element.addClassName("ui-inplaceeditor-saving");
+        result = this.element.fire("ui:inplaceeditor:after:save", {
+          inPlaceEditor : this
+        });
+        if (!result.stopped) {
+          this.element.removeClassName("ui-inplaceeditor-saving");
+        }
+      }
       if (event) { event.stop(); }
     },
 
@@ -99,12 +133,9 @@
         inPlaceEditor: this
       });
       if (!result.stopped) {
-        if (this._editing) {
-          this._form.remove();
-          this._editing = false;
-        }
+        this.stopEditing();
         if (this._saving) { this._saving = false; }
-        this.element.update(this.element.retrieve("previousContents")).show();
+        this.element.update(this.element.retrieve("previousContents"));
       }
       if (event) { event.stop(); }
     },
@@ -132,7 +163,7 @@
     },
 
     _submit: function (event) {
-
+      // TODO
     },
 
     _createForm: function () {
@@ -140,7 +171,7 @@
       if (Object.isElement(this._form)) { return; }
       form = new Element("FORM", {
         id: this.options.formId,
-        "class": this.options.formClassName
+        "class": this.options.formClassName + " ui-widget"
       });
       form.observe("submit", this._submit.bind(this));
       this._form = form;
@@ -159,7 +190,7 @@
         type = "INPUT";
         Object.extend(elementOptions, {
           type : "text",
-          size : parseInt(opt.size, 10)
+          size : opt.size
         });
       } else { // TEXTAREA
         type = "TEXTAREA";
@@ -176,6 +207,8 @@
     },
 
     _createControls: function () {
+      // FIXME: The buttons in the default scripty2 theme are placed too close
+      // together, unlike the ones in the button and dialog functional tests
       var controls = this._controls, opts = this.options.controls, text = "",
           form = this._form;
 
@@ -187,7 +220,7 @@
       insert(this.options.textBeforeControls);
       opts.each(function (opt) {
         var el, control;
-        // TODO: handle links
+        // TODO: handle links and others
         el = new Element(opt.type, { type: opt.type }).update(opt.label);
         control = new S2.UI.Button(el, {
           primary: opt.primary,
