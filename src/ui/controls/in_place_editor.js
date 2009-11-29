@@ -56,20 +56,25 @@
       if (Object.isElement(this._form)) {
         this._form.stopObserving("submit", this._submit.bind(this));
       }
+      // TODO: controls
+    },
+
+   /**
+    **/
+    getText: function () {
+      return this._text.unescapeHTML();
     },
 
     /**
     **/
     edit: function (event) {
       var result, externalControl = this.options.externalControl;
-
       if (this._editing || this._saving) { return; }
-      this._editing = true;
       result = this.element.fire("ui:inplaceeditor:edit", {
         inPlaceEditor : this
       });
-
       if (!result.stopped) {
+        this._editing = true;
         if (Object.isElement(externalControl)) { externalControl.hide(); }
         this.element.hide();
         this._createForm();
@@ -80,23 +85,28 @@
       if (event) { event.stop(); }
     },
 
-    /**
-    **/
-    getText: function () {
-      return this._text.unescapeHTML();
-    },
-
-    /**
+     /**
      **/
-    save: function () {
+    save: function (event) {
       // TODO
+      if (event) { event.stop(); }
     },
 
     /**
     **/
-    cancel: function () {
-      this.element.show();
-      // TODO
+    cancel: function (event) {
+      var result = this.element.fire("ui:inplaceeditor:cancel", {
+        inPlaceEditor: this
+      });
+      if (!result.stopped) {
+        if (this._editing) {
+          this._form.remove();
+          this._editing = false;
+        }
+        if (this._saving) { this._saving = false; }
+        this.element.update(this.element.retrieve("previousContents")).show();
+      }
+      if (event) { event.stop(); }
     },
 
     /**
@@ -106,15 +116,15 @@
       if (this._editing) { this.cancel(); }
       if (Object.isElement(this._form)) { this._form.remove(); }
       this.element.update(this.element.retrieve("originalContents"));
-      // TODO: remove classnames, title, and element stored data
+      // TODO: remove classnames, effects, title, and element stored data
     },
 
     _mouseenter: function () {
-      if (!this._editing) { this.options.onEnterHover(this); }
+      this.options.onEnterHover(this);
     },
 
     _mouseleave: function () {
-      if (!this._editing) { this.options.onLeaveHover(this); }
+      this.options.onLeaveHover(this);
     },
 
     _click: function (event) {
@@ -126,14 +136,18 @@
     },
 
     _createForm: function () {
-      var form = new Element("FORM", {
+      var form;
+      if (Object.isElement(this._form)) { return; }
+      form = new Element("FORM", {
         id: this.options.formId,
         "class": this.options.formClassName
       });
       form.observe("submit", this._submit.bind(this));
       this._form = form;
       this._createEditor();
-      // TODO
+      // TODO: Append BR if textarea
+      // TODO: onFormCustomization
+      this._createControls();
     },
 
     _createEditor: function () {
@@ -159,6 +173,34 @@
       if (opt.loadTextURL) { this._loadExternalText(); }
       this._form.insert({ top: editor });
       this._editor = editor;
+    },
+
+    _createControls: function () {
+      var controls = this._controls, opts = this.options.controls, text = "",
+          form = this._form;
+
+      function insert(item) {
+        // TODO: before/after text
+        form.insert({ bottom: item });
+      }
+
+      insert(this.options.textBeforeControls);
+      opts.each(function (opt) {
+        var el, control;
+        // TODO: handle links
+        el = new Element(opt.type, { type: opt.type }).update(opt.label);
+        control = new S2.UI.Button(el, {
+          primary: opt.primary,
+          seconary: opt.secondary
+        });
+        control.element.observe("click", function (event) {
+          event.stop();
+          opt.action(this);
+        }.bind(this));
+        controls.push(control);
+        insert(control);
+      }, this);
+      insert(this.options.textAfterControls);
     },
 
     _loadExternalText: function () {
@@ -187,11 +229,11 @@
       highlightColor: '#ffff99',
       htmlResponse: true,
       loadingClassName: 'ui-inplaceeditor-loading',
-      loadingText: 'Loading...',
+      loadingText: 'Loading&hellip;',
       paramName: 'value',
       rows: 1,                             // If 1 and multi-line, uses autoRows
       savingClassName: 'ui-inplaceeditor-saving',
-      savingText: 'Saving...',
+      savingText: 'Saving&hellip;',
       size: 0,
       stripLoadedTextTags: false,
       submitOnBlur: false,
