@@ -15,7 +15,9 @@
   <script src="../../dist/s2.js" type="text/javascript" charset="utf-8"></script>
 
   <script src="js/switcher.js" type="text/javascript"></script>
-  <script>var editors = [];</script>
+  <script>
+  var editors = [], saveURL = "fixtures/controls_in_place_editor_result.html";
+  </script>
 </head>
 
 <body>
@@ -25,6 +27,13 @@
   <h2>Standard In Place Editor</h2>
 
   <p id="tobeedited">To be edited</p>
+  <script>
+  editors.unshift(new S2.UI.InPlaceEditor("tobeedited", saveURL));
+      // override so we can use a static for the result
+      // (this is ok w/ post on my server, but add it on others if it's not
+      // ok elsewhere
+      // ajaxOptions: { method: "get" }
+  </script>
 
   <div class="description">
     <p>A standard in place editor with all the default options.</p>
@@ -39,17 +48,18 @@
     </ul>
   </div>
 
-  <script>
-    editors.unshift(new S2.UI.InPlaceEditor("tobeedited",
-      "fixtures/controls_in_place_editor_result.html", {
-        //override so we can use a static for the result
-        ajaxOptions: { method: "get" }
-    }));
-  </script>
-
   <h2>In Place Editor with Blur</h2>
 
-  <h3 id="tobeeditedblur">To be edited w/ blur</h3>
+  <p id="tobeeditedblur">To be edited w/ blur</p>
+  <script>
+  editors.unshift(new S2.UI.InPlaceEditor("tobeeditedblur", saveURL, {
+    submitOnBlur : true,
+    controls: [{
+      type: "button", label: "Cancel",
+      action : function (instance) { instance.cancel(); }
+    }]
+  }));
+  </script>
 
   <h2>In Place Editor with OK Link and Cancel Button</h2>
 

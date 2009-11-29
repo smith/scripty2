@@ -19,9 +19,9 @@
       var opt = this.setOptions(options),
           contents = this.element.innerHTML;
 
+      this.url = url;
       this._editing = false;
       this._saving = false;
-      this._text = contents;
       this._editor = null; // the input or text area
       this._controls = []; // the buttons and/or links
       this.observers = {
@@ -34,13 +34,13 @@
         S2.CSS.colorFromString(this.element.getStyle("background-color"))
       );
       this.element.store("originalContents", contents);
-      this.element.store("previousContents", contents);
       this.element.store("originalTitle", this.element.readAttribute("title"));
       this.element.writeAttribute("title", opt.clickToEditText);
 
       UI.addClassNames(this.element, 'ui-widget ui-inplaceeditor');
       UI.addBehavior(this.element, UI.Behavior.Hover);
       this.addObservers();
+      this.setText(contents);
     },
 
     addObservers: function () {
@@ -54,10 +54,10 @@
         this.element.stopObserving(o, this.observers[o]);
       }}
       if (Object.isElement(this._form)) {
-        this._form.stopObserving("submit", this._submit.bind(this));
+        this._form.stopObserving("submit");
       }
       if (Object.isElement(this._editor)) {
-        this._editor.stopObserving("blur", this._submit.bind(this));
+        this._editor.stopObserving("blur");
       }
       // TODO: stop observing controls
     },
@@ -67,6 +67,14 @@
     getText: function () {
       return this._text.unescapeHTML();
     },
+
+    /**
+    **/
+    setText: function (text) {
+      this._text = text;
+      this.element.store("previousContents", text);
+      return text;
+   },
 
     /**
     **/
@@ -81,6 +89,7 @@
         if (Object.isElement(externalControl)) { externalControl.hide(); }
         this.element.hide();
         this._createForm();
+        this._editor.setValue(this.getText());
         this.element.insert({ before: this._form });
         if (!this.options.loadTextURL) { this._postProcessEditField(); }
       }
@@ -110,18 +119,39 @@
     save: function (event) {
       var result = this.element.fire("ui:inplaceeditor:before:save", {
         inPlaceEditor : this
-      });
+      }), ajaxOptions = this.options.ajaxOptions;
+
       if (!result.stopped) {
-        // TODO
+        this._saving = true;
         this.stopEditing();
         this.element.update(this.options.savingText);
         this.element.addClassName("ui-inplaceeditor-saving");
-        result = this.element.fire("ui:inplaceeditor:after:save", {
-          inPlaceEditor : this
-        });
-        if (!result.stopped) {
-          this.element.removeClassName("ui-inplaceeditor-saving");
+        // TODO: callback for params instead of serialize
+        // TODO: wrap onComplete/onFailure callbacks
+        if (!Object.isFunction(ajaxOptions.onComplete)) {
+          ajaxOptions.onComplete = function (transport) {
+            result = this.element.fire("ui:inplaceeditor:after:save", {
+              inPlaceEditor : this
+            });
+            if (!result.stopped) {
+              //TODO: Highlight
+              this.element.removeClassName("ui-inplaceeditor-saving");
+              this.setText(transport.responseText);
+              this.element.update(this.getText());
+              this._saving = false;
+            }
+          }.bind(this);
         }
+        if (!Object.isFunction(ajaxOptions.onFailure)) {
+          ajaxOptions.onFailure = function (transport) {
+            //TODO: Update, event
+          }.bind(this);
+        }
+        if (this.options.htmlResponse) { ajaxOptions.evalScripts = true; }
+        Object.extend(ajaxOptions, {
+          parameters: { editorId: this.element.identify() }
+        });
+        this._form.request(ajaxOptions);
       }
       if (event) { event.stop(); }
     },
@@ -162,18 +192,16 @@
        this.edit(event);
     },
 
-    _submit: function (event) {
-      // TODO
-    },
-
     _createForm: function () {
       var form;
       if (Object.isElement(this._form)) { return; }
       form = new Element("FORM", {
         id: this.options.formId,
-        "class": this.options.formClassName + " ui-widget"
+        "class": this.options.formClassName + " ui-widget",
+        action: this.url,
+        method: this.options.ajaxOptions.method || "post"
       });
-      form.observe("submit", this._submit.bind(this));
+      form.observe("submit", this.save.bind(this));
       this._form = form;
       this._createEditor();
       // TODO: Append BR if textarea
@@ -185,7 +213,7 @@
       var text = this.getText(), opt = this.options, editor, elementOptions,
           rows = parseInt(opt.rows, 10), type;
       if (opt.loadTextURL) { text = opt.loadingText; }
-      elementOptions = { name: opt.paramName, value: text };
+      elementOptions = { name: opt.paramName };
       if (rows <= 1 && !/\r|\n/.test(text)) { // INPUT
         type = "INPUT";
         Object.extend(elementOptions, {
@@ -200,7 +228,7 @@
         });
       }
       editor = new Element(type, elementOptions);
-      if (opt.submitOnBlur) { editor.observe("blur", this._submit.bind(this)); }
+      if (opt.submitOnBlur) { editor.observe("blur", this.save.bind(this)); }
       if (opt.loadTextURL) { this._loadExternalText(); }
       this._form.insert({ top: editor });
       this._editor = editor;
