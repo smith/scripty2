@@ -45,6 +45,8 @@
       <li>When clicked, it <strong>should</strong> enter edit mode. The form <strong>should</strong> appear with a text input and "OK" and "Cancel" buttons. The text input should be focused and contain the text that was in the element before edit mode was entered. The text <strong>should</strong> be selected.</li>
       <li>When "Cancel" is clicked, it <strong>should</strong> revert back to its previous state.</li>
       <li>When "OK" is clicked, it <strong>should</strong> leave edit mode and display "Saving&hellip;" until it is updated from the server's response.</li>
+      <li>Pressing the <kbd>ESC</kbd> key when the input is focused should have the same effect as clicking "Cancel."</li>
+      <li>Pressing the <kbd>ENTER</kbd> key when the input is focused should have the same effect as clicking "OK."</li>
     </ul>
   </div>
 
@@ -54,12 +56,16 @@
   <script>
   editors.unshift(new S2.UI.InPlaceEditor("tobeeditedblur", saveURL, {
     submitOnBlur : true,
-    controls: [{
-      type: "button", label: "Cancel",
-      action : function (instance) { instance.cancel(); }
-    }]
+    controls: []
   }));
   </script>
+
+  <div class="description">
+    <p>An in place editor with the <code>submitOnBlur</code> option set to <code>true</code> and no controls.</p>
+    <ul>
+      <li>It <strong>should</strong> submit when editing and losing focus.</li>
+    </ul>
+  </div>
 
   <h2>In Place Editor with OK Link and Cancel Button</h2>
 

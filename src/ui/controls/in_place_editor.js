@@ -1,4 +1,4 @@
-/*global $, Class, Element, S2 */
+/*global $, Class, Element, Event, S2 */
 
 (function(UI) {
 
@@ -58,6 +58,7 @@
       }
       if (Object.isElement(this._editor)) {
         this._editor.stopObserving("blur");
+        this._editor.stopObserving("keydown");
       }
       // TODO: stop observing controls
     },
@@ -204,14 +205,13 @@
       form.observe("submit", this.save.bind(this));
       this._form = form;
       this._createEditor();
-      // TODO: Append BR if textarea
       // TODO: onFormCustomization
       this._createControls();
     },
 
     _createEditor: function () {
       var text = this.getText(), opt = this.options, editor, elementOptions,
-          rows = parseInt(opt.rows, 10), type;
+          rows = parseInt(opt.rows, 10), type, afterText;
       if (opt.loadTextURL) { text = opt.loadingText; }
       elementOptions = { name: opt.paramName };
       if (rows <= 1 && !/\r|\n/.test(text)) { // INPUT
@@ -220,35 +220,34 @@
           type : "text",
           size : opt.size
         });
+        afterText = "&nbsp";
       } else { // TEXTAREA
         type = "TEXTAREA";
         Object.extend(elementOptions, {
           rows: rows > 1 ? rows : opt.autoRows,
           cols: opt.cols
         });
+        afterText = "<br />";
       }
       editor = new Element(type, elementOptions);
+      editor.observe("keydown", this._checkForEscapeOrReturn.bind(this));
       if (opt.submitOnBlur) { editor.observe("blur", this.save.bind(this)); }
       if (opt.loadTextURL) { this._loadExternalText(); }
-      this._form.insert({ top: editor });
+      this._form.insert({ top: editor, bottom: afterText });
       this._editor = editor;
     },
 
     _createControls: function () {
-      // FIXME: The buttons in the default scripty2 theme are placed too close
-      // together, unlike the ones in the button and dialog functional tests
       var controls = this._controls, opts = this.options.controls, text = "",
-          form = this._form;
+          form = this._form, between = this.options.textBetweenControls;
 
-      function insert(item) {
-        // TODO: before/after text
-        form.insert({ bottom: item });
-      }
+      function insert(item) { form.insert({ bottom: item }); }
 
       insert(this.options.textBeforeControls);
-      opts.each(function (opt) {
-        var el, control;
+      opts.each(function (opt, i) {
+        var el, control, last = i === opts.length;
         // TODO: handle links and others
+        // TODO: text or function for button action
         el = new Element(opt.type, { type: opt.type }).update(opt.label);
         control = new S2.UI.Button(el, {
           primary: opt.primary,
@@ -260,8 +259,16 @@
         }.bind(this));
         controls.push(control);
         insert(control);
+        if (!last) { insert(between); }
       }, this);
       insert(this.options.textAfterControls);
+    },
+
+    _checkForEscapeOrReturn: function (event) {
+      var e = event;
+      if (!this._editing || e.ctrlKey || e.altKey || e.shiftKey) { return; }
+      if (Event.KEY_ESC === e.keyCode) { this.cancel(e); }
+      else if (Event.KEY_RETURN === e.keyCode) { this.save(e); }
     },
 
     _loadExternalText: function () {
@@ -300,7 +307,7 @@
       submitOnBlur: false,
       textAfterControls: '',
       textBeforeControls: '',
-      textBetweenControls: '',
+      textBetweenControls: '&nbsp;',
       controls : [
         {
           type: "button",
