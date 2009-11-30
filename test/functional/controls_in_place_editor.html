@@ -101,14 +101,43 @@
     </ul>
   </div>
 
-<!--
   <h2>In Place Editor with OK Link Only</h2>
 
-  <h3 id="tobeeditedoklinkonly">To be edited w/ okLink only </h3>
+  <p id="tobeeditedoklinkonly">To be edited w/ ok link only</p>
+  <script>
+  editors.unshift(new S2.UI.InPlaceEditor("tobeeditedoklinkonly", saveURL, {
+    textBetweenControls: "&nbsp;|&nbsp;",
+    controls: [ { type: "link", label: "OK", action: "save" } ]
+  }));
+  </script>
+
+  <div class="description">
+    <p>An in place editor with an "OK" link as its only control and the <code>textBetweenControls</code> option set.</p>
+    <ul>
+      <li>The "OK" control <strong>should</strong> be a link.</li>
+      <li>The controls <strong>should not</strong> display "&nbsp;|&nbsp;" <em>between</em> them (since there's only one.)</li>
+    </ul>
+  </div>
 
   <h2>In Place Editor with External Edit Control and Custom Parameter Name</h2>
 
   <span id="tobeedited2">With external edit control and custom parameter name</span> &nbsp; <a id="tobeedited2EditControl" href="#">edit</a>
+  <script>
+  editors.unshift(new S2.UI.InPlaceEditor("tobeedited2", saveURL, {
+    externalControl: "tobeedited2EditControl",
+    paramName: "foobar"
+  }));
+  </script>
+
+  <div class="description">
+    <p>An in place editor with an <code>externalControl</code> and the <code>paramName</code> option set to <code>"foobar"</code>.</p>
+    <ul>
+      <li>The "edit" link <strong>should</strong> enter edit mode.</li>
+      <li>The "edit" link <strong>should</strong> disappear when clicked.</li>
+      <li>The "edit" link <strong>should</strong> reappear when exiting edit mode.</li>
+      <li>The POST parameter name <strong>should</strong> be <code>foobar</code> and <em>not</em> <code>value</code>.</li>
+    </ul>
+  </div>
 
   <h2>In Place Editor in a Table Cell</h2>
 
@@ -120,16 +149,43 @@
       </tr>
     </tbody>
   </table>
+  <script>
+  editors.unshift(new S2.UI.InPlaceEditor("tobeeditedtd", saveURL, {
+    externalControl: "tobeeditedTDEditControl"
+  }));
+  </script>
 
   <h2>Multi-row In Place Editor</h2>
 
   <p id="tobeedited3">Multi row editor: Lorum ipsum lorum ipsum lorum ipsum lorum ipsum lorum ipsum lorum ipsum lorum ipsum lorum ipsum lorum ipsum lorum ipsum lorum ipsum lorum ipsum lorum ipsum lorum ipsum lorum ipsum lorum ipsum lorum ipsum</p>
+  <script>
+  editors.unshift(new S2.UI.InPlaceEditor("tobeedited3", saveURL, {
+    rows: 5
+  }));
+  </script>
+
+  <div class="description">
+    <p>An in place editor with the <code>rows</code> option set to <code>5</code>.</p>
+    <ul>
+      <li>The edit input <strong>should</strong> be a textarea with 5 rows.</li>
+    </ul>
+  </div>
 
   <h2>In Place Editor with Text from Server</h2>
 
   <p id="tobeedited4">Loads text from server</p>
+  <script>
+  editors.unshift(new S2.UI.InPlaceEditor("tobeedited4", saveURL, {
+    loadTextURL: "fixtures/controls_in_place_editor_text.html"
+  }));
+  </script>
 
--->
+  <div class="description">
+    <p>An in place editor with the <code>loadExternalText</code> option set.</code>.</p>
+    <ul>
+      <li>When entering edit mode, the field should be disabled and display "Loading&hellip;" until the text is loaded from the server. It should then focus and select the text as usual.</li>
+    </ul>
+  </div>
 <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/> <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
 
   <h2>In Place Editor Very Far Down to Test Scrolling Bug</h2>

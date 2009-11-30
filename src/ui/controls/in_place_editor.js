@@ -1,4 +1,4 @@
-/*global $, Class, Element, Event, S2 */
+/*global $, Ajax, Class, Element, Event, S2 */
 
 (function(UI) {
 
@@ -44,9 +44,13 @@
     },
 
     addObservers: function () {
+      var external = $(this.options.externalControl);
       for (var o in this.observers) { if (this.observers.hasOwnProperty(o)) {
         this.element.observe(o, this.observers[o]);
       }}
+      if (Object.isElement(external)) {
+        external.observe("click", this.edit.bind(this));
+      }
     },
 
     removeObservers: function () {
@@ -80,7 +84,7 @@
     /**
     **/
     edit: function (event) {
-      var result, externalControl = this.options.externalControl;
+      var result, externalControl = $(this.options.externalControl);
       if (this._editing || this._saving) { return; }
       result = this.element.fire("ui:inplaceeditor:enter", {
         inPlaceEditor : this
@@ -101,7 +105,7 @@
     /**
     **/
     stopEditing: function (event) {
-      var result;
+      var result, externalControl = $(this.options.externalControl);
       if (!this._editing) { return; }
       result = this.element.fire("ui:inplaceeditor:leave", {
         inPlaceEditor : this
@@ -110,6 +114,7 @@
           this._editing = false;
           this._form.remove();
           this.element.show();
+          if (Object.isElement(externalControl)) { externalControl.show(); }
       }
 
       if (event) { event.stop(); }
@@ -196,7 +201,7 @@
     _createForm: function () {
       var form;
       if (Object.isElement(this._form)) { return; }
-      form = new Element("FORM", {
+      form = new Element("form", {
         id: this.options.formId,
         "class": this.options.formClassName + " ui-widget",
         action: this.url,
@@ -231,10 +236,10 @@
       }
       editor = new Element(type, elementOptions);
       editor.observe("keydown", this._checkForEscapeOrReturn.bind(this));
+      this._editor = editor;
       if (opt.submitOnBlur) { editor.observe("blur", this.save.bind(this)); }
       if (opt.loadTextURL) { this._loadExternalText(); }
       this._form.insert({ top: editor, bottom: afterText });
-      this._editor = editor;
     },
 
     _createControls: function () {
@@ -243,6 +248,7 @@
 
       function insert(item) { form.insert({ bottom: item }); }
 
+      if (this.options.externalControlOnly) { opts = []; }
       insert(this.options.textBeforeControls);
       opts.each(function (opt, i) {
         var el, control, last = i === opts.length - 1;
@@ -253,16 +259,17 @@
             seconary: opt.secondary
           });
         } else if (opt.type === "link") {
-          el = new Element("A", { href: "#" });
+          el = new Element("a", { href: "#" });
           control = { element: el };
-        } else {
-          // TODO: Handle items that aren't buttons or links (text, element)
+        } else { // Anything else (string or element) should be inserted as-is
+          control = { element: opt };
         }
         el.update(opt.label);
         control.element.observe("click", function (event) {
+          var action = opt.action;
           event.stop();
-          // TODO: text or function for button action
-          opt.action(this);
+          if (Object.isFunction(action)) { action(this); }
+          else if (Object.isString(action)) { this[action](event); }
         }.bind(this));
         controls.push(control);
         insert(control.element);
@@ -279,7 +286,23 @@
     },
 
     _loadExternalText: function () {
-      // TODO
+      var options = Object.extend({ method: 'get' }, this.options.ajaxOptions),
+          r;
+      this._form.addClassName(this.options.loadingClassName);
+      this._editor.setValue(this.options.loadingText).disable();
+      Object.extend(options, {
+        parameters: { editorId: this.element.identify() },
+        onSuccess: function (transport) {
+          var text = transport.responseText;
+          this._form.removeClassName(this.options.loadingClassName);
+          if (this.options.stripLoadedTextTags) { text = text.stripTags(); }
+          this.setText(text);
+          this._editor.setValue(text).enable();
+          this._postProcessEditField();
+        }.bind(this),
+        onFailure: function () {} // TODO: handle failure
+      });
+      r = new Ajax.Request(this.options.loadTextURL, options);
     },
 
     _postProcessEditField: function () {
@@ -320,13 +343,13 @@
           type: "button",
           label: "OK",
           primary: true,
-          action: function (instance) { instance.save(); }
+          action: "save"
         },
         {
           type: "button",
           label: "Cancel",
           secondary: true,
-          action: function (instance) { instance.cancel(); }
+          action: "cancel"
         }
       ],
       onEnterHover: function (instance) {
