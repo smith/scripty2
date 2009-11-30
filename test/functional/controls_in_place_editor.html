@@ -67,11 +67,41 @@
     </ul>
   </div>
 
-<!--
   <h2>In Place Editor with OK Link and Cancel Button</h2>
 
-  <h3 id="tobeeditedoklink">To be edited w/ okLink and cancelButton</h3>
+  <p id="tobeeditedoklink">To be edited w/ ok link and cancel button</p>
+  <script>
+  editors.unshift(new S2.UI.InPlaceEditor("tobeeditedoklink", saveURL, {
+    textBeforeControls: "&nbsp;---&gt;&nbsp;",
+    textAfterControls: "&nbsp;&lt;---&nbsp;",
+    textBetweenControls: "&nbsp;|&nbsp;",
+    controls: [
+      {
+        type: "link",
+        label: "OK",
+        action: function (instance) { instance.save(); }
+      },
+      {
+        type: "button",
+        label: "Cancel",
+        action: function (instance) { instance.cancel(); }
+      }
+    ]
+  }));
+  </script>
 
+  <div class="description">
+    <p>An in place editor with the "OK" control as a link (an <code>A</code> tag), the "Cancel" control as a button, and the <code>textBeforeControls</code>, <code>textAfterControls</code>, and <code>textBetweenControls</code> options set.</p>
+    <ul>
+      <li>The "OK" control <strong>should</strong> be a link.</li>
+      <li>The "Cancel" control <strong>should</strong> be a button.</li>
+      <li>The controls <strong>should</strong> display "&nbsp;---&gt;&nbsp;" <em>before</em> them.</li>
+      <li>The controls <strong>should</strong> display "&nbsp;&lt;---&nbsp;" <em>after</em> them.</li>
+      <li>The controls <strong>should</strong> display "&nbsp;|&nbsp;" <em>between</em> them.</li>
+    </ul>
+  </div>
+
+<!--
   <h2>In Place Editor with OK Link Only</h2>
 
   <h3 id="tobeeditedoklinkonly">To be edited w/ okLink only </h3>
@@ -85,7 +115,7 @@
   <table>
     <tbody>
       <tr>
-        <td><span id="tobeeditedTD">test</span></td>
+        <td><span id="tobeeditedtd">test</span></td>
         <td><a id="tobeeditedTDEditControl" href="#">edit</a></td>
       </tr>
     </tbody>
@@ -104,9 +134,9 @@
 
   <h2>In Place Editor Very Far Down to Test Scrolling Bug</h2>
 
-  <p id="tobeeditedFarDown">Editor very far down to test scrolling bug</p>
+  <p id="tobeeditedfardown">Editor very far down to test scrolling bug</p>
   <script>
-  editors.unshift(new S2.UI.InPlaceEditor("tobeeditedFarDown", saveURL));
+  editors.unshift(new S2.UI.InPlaceEditor("tobeeditedfardown", saveURL));
   </script>
 </body>
 </html>

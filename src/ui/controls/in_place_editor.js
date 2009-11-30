@@ -245,20 +245,27 @@
 
       insert(this.options.textBeforeControls);
       opts.each(function (opt, i) {
-        var el, control, last = i === opts.length;
-        // TODO: handle links and others
-        // TODO: text or function for button action
-        el = new Element(opt.type, { type: opt.type }).update(opt.label);
-        control = new S2.UI.Button(el, {
-          primary: opt.primary,
-          seconary: opt.secondary
-        });
+        var el, control, last = i === opts.length - 1;
+        if (opt.type === "button") {
+          el = new Element(opt.type, { type: opt.type });
+          control = new S2.UI.Button(el, {
+            primary: opt.primary,
+            seconary: opt.secondary
+          });
+        } else if (opt.type === "link") {
+          el = new Element("A", { href: "#" });
+          control = { element: el };
+        } else {
+          // TODO: Handle items that aren't buttons or links (text, element)
+        }
+        el.update(opt.label);
         control.element.observe("click", function (event) {
           event.stop();
+          // TODO: text or function for button action
           opt.action(this);
         }.bind(this));
         controls.push(control);
-        insert(control);
+        insert(control.element);
         if (!last) { insert(between); }
       }, this);
       insert(this.options.textAfterControls);
