@@ -89,7 +89,8 @@
         this._createForm();
         this._editor.setValue(this.getText());
         this.element.insert({ before: this._form });
-        if (!this.options.loadTextURL) this._postProcessEditField();
+        var fpc = this.options.fieldPostCreation;
+        this._editor[fpc ? fpc : "activate"]();
       }
 
       if (event) event.stop();
@@ -201,11 +202,9 @@
 
     // TODO: Comment for clarity
     _createEditor: function () {
-      var text = this.getText(), opt = this.options,
-          rows = parseInt(opt.rows, 10), type, afterText;
-      if (opt.loadTextURL) text = opt.loadingText;
+      var opt = this.options, rows = parseInt(opt.rows, 10), type, afterText;
       var elementOptions = { name: opt.paramName };
-      if (rows <= 1 && !/\r|\n/.test(text)) { // INPUT
+      if (rows <= 1 && !/\r|\n/.test(this.getText())) { // INPUT
         type = "INPUT";
         Object.extend(elementOptions, {
           type: "text",
@@ -224,7 +223,6 @@
       editor.observe("keydown", this._checkForEscapeOrReturn.bind(this));
       this._editor = editor;
       if (opt.submitOnBlur) editor.observe("blur", this.save.bind(this));
-      if (opt.loadTextURL) this._loadExternalText();
       this._form.insert({ top: editor, bottom: afterText });
     },
 
@@ -270,32 +268,6 @@
       if (!this._editing || e.ctrlKey || e.altKey || e.shiftKey) return;
       if (Event.KEY_ESC === e.keyCode) this.cancel(e);
       else if (Event.KEY_RETURN === e.keyCode) this.save(e);
-    },
-
-    _loadExternalText: function () {
-      var options = Object.extend({ method: 'get' }, this.options.ajaxOptions);
-      this._form.addClassName(this.options.loadingClassName);
-      this._editor.setValue(this.options.loadingText).disable();
-      Object.extend(options, {
-        parameters: { editorId: this.element.identify() },
-        onSuccess: function (transport) {
-          var text = transport.responseText;
-          this._form.removeClassName(this.options.loadingClassName);
-          if (this.options.stripLoadedTextTags) text = text.stripTags();
-          this.setText(text);
-          this._editor.setValue(text).enable();
-          this._postProcessEditField();
-        }.bind(this),
-        onFailure: function () {} // TODO: handle failure
-      });
-      new Ajax.Request(this.options.loadTextURL, options);
-    },
-
-    _postProcessEditField: function () {
-      var fpc = this.options.fieldPostCreation;
-      if (fpc && Object.isElement(this._editor)) {
-        this._editor[fpc === "focus" ? "focus" : "activate"]();
-      }
     }
   });
 
@@ -308,8 +280,6 @@
       fieldPostCreation: 'activate',       // 'activate'|'focus'|false
       formClassName: 'ui-ipe-form',
       htmlResponse: true,
-      loadingClassName: 'ui-ipe-loading',
-      loadingText: 'Loading&hellip;',
       paramName: 'value',
       rows: 1,                             // If 1 and multi-line, uses autoRows
       savingClassName: 'ui-ipe-saving',
