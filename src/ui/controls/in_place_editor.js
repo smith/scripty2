@@ -36,7 +36,7 @@
         this.element.readAttribute("title"));
       this.element.writeAttribute("title", opt.clickToEditText);
 
-      UI.addClassNames(this.element, 'ui-widget ui-inplaceeditor');
+      UI.addClassNames(this.element, 'ui-widget ui-ipe');
       UI.addBehavior(this.element, UI.Behavior.Hover);
       this.addObservers();
       this.setText(contents);
@@ -83,7 +83,7 @@
     edit: function (event) {
       var externalControl = $(this.options.externalControl);
       if (this._editing || this._saving) return;
-      var result = this.element.fire("ui:inplaceeditor:enter", {
+      var result = this.element.fire("ui:ipe:enter", {
         inPlaceEditor: this
       });
       if (!result.stopped) {
@@ -104,7 +104,7 @@
     stopEditing: function (event) {
       var externalControl = $(this.options.externalControl);
       if (!this._editing) return;
-      var result = this.element.fire("ui:inplaceeditor:leave", {
+      var result = this.element.fire("ui:ipe:leave", {
         inPlaceEditor: this
       });
       if (!result.stopped) {
@@ -120,7 +120,7 @@
     /**
     **/
     save: function (event) {
-      var result = this.element.fire("ui:inplaceeditor:before:save", {
+      var result = this.element.fire("ui:ipe:before:save", {
         inPlaceEditor: this
       }), ajaxOptions = this.options.ajaxOptions;
 
@@ -128,17 +128,17 @@
         this._saving = true;
         this.stopEditing();
         this.element.update(this.options.savingText);
-        this.element.addClassName("ui-inplaceeditor-saving");
+        this.element.addClassName("ui-ipe-saving");
         // TODO: callback for params instead of serialize
         // TODO: wrap onComplete/onFailure callbacks
         if (!Object.isFunction(ajaxOptions.onComplete)) {
           ajaxOptions.onComplete = function (transport) {
-            result = this.element.fire("ui:inplaceeditor:after:save", {
+            result = this.element.fire("ui:ipe:after:save", {
               inPlaceEditor: this
             });
             if (!result.stopped) {
               //TODO: Highlight
-              this.element.removeClassName("ui-inplaceeditor-saving");
+              this.element.removeClassName("ui-ipe-saving");
               this.setText(transport.responseText);
               this.element.update(this.getText());
               this._saving = false;
@@ -162,7 +162,7 @@
     /**
     **/
     cancel: function (event) {
-      var result = this.element.fire("ui:inplaceeditor:cancel", {
+      var result = this.element.fire("ui:ipe:cancel", {
         inPlaceEditor: this
       });
       if (!result.stopped) {
@@ -205,11 +205,13 @@
       });
       form.observe("submit", this.save.bind(this));
       this._form = form;
+      // TODO: Move these methods into this one
       this._createEditor();
       // TODO: onFormCustomization
       this._createControls();
     },
 
+    // TODO: Comment for clarity
     _createEditor: function () {
       var text = this.getText(), opt = this.options,
           rows = parseInt(opt.rows, 10), type, afterText;
@@ -238,6 +240,7 @@
       this._form.insert({ top: editor, bottom: afterText });
     },
 
+    // TODO: Comment for clarity
     _createControls: function () {
       var controls = this._controls, opts = this.options.controls, text = "",
           form = this._form, between = this.options.textBetweenControls;
@@ -317,15 +320,15 @@
       externalControl: null,               // id|elt
       externalControlOnly: false,
       fieldPostCreation: 'activate',       // 'activate'|'focus'|false
-      formClassName: 'ui-inplaceeditor-form',
+      formClassName: 'ui-ipe-form',
       formId: null,                        // id|elt
       highlightColor: '#ffff99',
       htmlResponse: true,
-      loadingClassName: 'ui-inplaceeditor-loading',
+      loadingClassName: 'ui-ipe-loading',
       loadingText: 'Loading&hellip;',
       paramName: 'value',
       rows: 1,                             // If 1 and multi-line, uses autoRows
-      savingClassName: 'ui-inplaceeditor-saving',
+      savingClassName: 'ui-ipe-saving',
       savingText: 'Saving&hellip;',
       size: 0,
       stripLoadedTextTags: false,
