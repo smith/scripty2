@@ -134,7 +134,6 @@
               inPlaceEditor: this
             });
             if (!result.stopped) {
-              //TODO: Highlight
               this.element.removeClassName("ui-ipe-saving");
               this.setText(transport.responseText);
               this.element.update(this.getText());
@@ -144,7 +143,7 @@
         }
         if (!Object.isFunction(ajaxOptions.onFailure)) {
           ajaxOptions.onFailure = function (transport) {
-            //TODO: Update, event
+            //TODO: event
           }.bind(this);
         }
         if (this.options.htmlResponse) ajaxOptions.evalScripts = true;
@@ -173,11 +172,26 @@
     /**
     **/
     destroy: function() {
+      var storage = this.element.getStorage();
       this.removeObservers();
       if (this._editing) this.cancel();
       if (Object.isElement(this._form)) this._form.remove();
       this.element.update(this.element.retrieve("ui.ipe.originalContents"));
-      // TODO: remove classnames, effects, title, and element stored data
+      this.element.writeAttribute("title",
+        this.element.retrieve("ui.ipe.originalTitle"));
+      // FIXME: Remove behaviors
+      //UI.removeBehavior(this.element, UI.Behavior.Hover);
+
+      // Remove classnames
+      // FIXME: If the element is another widget, this will remove the
+      // ui-widget class
+      this.element.classNames().each(function (c) {
+        if (c.startsWith("ui-")) this.element.removeClassName(c);
+      }, this);
+      // Remove data stored on element
+      storage.keys().each(function (k) {
+        if (String(k).startsWith("ui.ipe.")) { storage.unset(k); }
+      });
     },
 
     _click: function (event) {
