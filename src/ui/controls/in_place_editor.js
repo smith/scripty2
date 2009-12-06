@@ -175,12 +175,11 @@
       var storage = this.element.getStorage();
       this.removeObservers();
       if (this._editing) this.cancel();
-      if (Object.isElement(this._form)) this._form.remove();
+      if (Object.isElement(this._form)) delete this._form;
       this.element.update(this.element.retrieve("ui.ipe.originalContents"));
       this.element.writeAttribute("title",
         this.element.retrieve("ui.ipe.originalTitle"));
-      // FIXME: Remove behaviors
-      //UI.removeBehavior(this.element, UI.Behavior.Hover);
+      UI.removeBehavior(this.element, UI.Behavior.Hover);
 
       // Remove classnames
       // FIXME: If the element is another widget, this will remove the
