@@ -55,7 +55,7 @@
   <p id="tobeeditedblur">To be edited w/ blur</p>
   <script>
   editors.unshift(new S2.UI.InPlaceEditor("tobeeditedblur", saveURL, {
-    submitOnBlur : true,
+    submitOnBlur: true,
     controls: []
   }));
   </script>
@@ -76,16 +76,8 @@
     textAfterControls: "&nbsp;&lt;---&nbsp;",
     textBetweenControls: "&nbsp;|&nbsp;",
     controls: [
-      {
-        type: "link",
-        label: "OK",
-        action: function (instance) { instance.save(); }
-      },
-      {
-        type: "button",
-        label: "Cancel",
-        action: function (instance) { instance.cancel(); }
-      }
+      { type: "link", label: "OK", action: "save" },
+      { type: "button", label: "Cancel", action: "cancel" }
     ]
   }));
   </script>
@@ -181,7 +173,7 @@
   </script>
 
   <div class="description">
-    <p>An in place editor with the <code>loadExternalText</code> option set.</code>.</p>
+    <p>An in place editor with the <code>loadExternalText</code> option set.</p>
     <ul>
       <li>When entering edit mode, the field should be disabled and display "Loading&hellip;" until the text is loaded from the server. It should then focus and select the text as usual.</li>
     </ul>

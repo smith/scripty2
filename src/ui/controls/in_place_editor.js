@@ -1,5 +1,3 @@
-/*global $, Ajax, Class, Element, Event, S2 */
-
 (function(UI) {
 
   /** section: scripty2 ui
@@ -30,11 +28,12 @@
         click: this._click.bind(this)
       };
       this.element.store(this.NAME, this);
-      this.element.store("originalBackground",
+      this.element.store("ui.ipe.originalBackground",
         S2.CSS.colorFromString(this.element.getStyle("background-color"))
       );
-      this.element.store("originalContents", contents);
-      this.element.store("originalTitle", this.element.readAttribute("title"));
+      this.element.store("ui.ipe.originalContents", contents);
+      this.element.store("ui.ipe.originalTitle",
+        this.element.readAttribute("title"));
       this.element.writeAttribute("title", opt.clickToEditText);
 
       UI.addClassNames(this.element, 'ui-widget ui-inplaceeditor');
@@ -45,21 +44,19 @@
 
     addObservers: function () {
       var external = $(this.options.externalControl);
-      for (var o in this.observers) { if (this.observers.hasOwnProperty(o)) {
+      Object.keys(this.observers).each(function (o) {
         this.element.observe(o, this.observers[o]);
-      }}
+      }.bind(this));
       if (Object.isElement(external)) {
         external.observe("click", this.edit.bind(this));
       }
     },
 
     removeObservers: function () {
-      for (var o in this.observers) { if (this.observers.hasOwnProperty(o)) {
+      Object.keys(this.observers).each(function (o) {
         this.element.stopObserving(o, this.observers[o]);
-      }}
-      if (Object.isElement(this._form)) {
-        this._form.stopObserving("submit");
-      }
+      }.bind(this));
+      if (Object.isElement(this._form)) this._form.stopObserving("submit");
       if (Object.isElement(this._editor)) {
         this._editor.stopObserving("blur");
         this._editor.stopObserving("keydown");
@@ -77,54 +74,54 @@
     **/
     setText: function (text) {
       this._text = text;
-      this.element.store("previousContents", text);
+      this.element.store("ui.ipe.previousContents", text);
       return text;
    },
 
     /**
     **/
     edit: function (event) {
-      var result, externalControl = $(this.options.externalControl);
-      if (this._editing || this._saving) { return; }
-      result = this.element.fire("ui:inplaceeditor:enter", {
-        inPlaceEditor : this
+      var externalControl = $(this.options.externalControl);
+      if (this._editing || this._saving) return;
+      var result = this.element.fire("ui:inplaceeditor:enter", {
+        inPlaceEditor: this
       });
       if (!result.stopped) {
         this._editing = true;
-        if (Object.isElement(externalControl)) { externalControl.hide(); }
+        if (Object.isElement(externalControl)) externalControl.hide();
         this.element.hide();
         this._createForm();
         this._editor.setValue(this.getText());
         this.element.insert({ before: this._form });
-        if (!this.options.loadTextURL) { this._postProcessEditField(); }
+        if (!this.options.loadTextURL) this._postProcessEditField();
       }
 
-      if (event) { event.stop(); }
+      if (event) event.stop();
     },
 
     /**
     **/
     stopEditing: function (event) {
-      var result, externalControl = $(this.options.externalControl);
-      if (!this._editing) { return; }
-      result = this.element.fire("ui:inplaceeditor:leave", {
-        inPlaceEditor : this
+      var externalControl = $(this.options.externalControl);
+      if (!this._editing) return;
+      var result = this.element.fire("ui:inplaceeditor:leave", {
+        inPlaceEditor: this
       });
       if (!result.stopped) {
           this._editing = false;
           this._form.remove();
           this.element.show();
-          if (Object.isElement(externalControl)) { externalControl.show(); }
+          if (Object.isElement(externalControl)) externalControl.show();
       }
 
-      if (event) { event.stop(); }
+      if (event) event.stop();
     },
 
     /**
     **/
     save: function (event) {
       var result = this.element.fire("ui:inplaceeditor:before:save", {
-        inPlaceEditor : this
+        inPlaceEditor: this
       }), ajaxOptions = this.options.ajaxOptions;
 
       if (!result.stopped) {
@@ -137,7 +134,7 @@
         if (!Object.isFunction(ajaxOptions.onComplete)) {
           ajaxOptions.onComplete = function (transport) {
             result = this.element.fire("ui:inplaceeditor:after:save", {
-              inPlaceEditor : this
+              inPlaceEditor: this
             });
             if (!result.stopped) {
               //TODO: Highlight
@@ -153,13 +150,13 @@
             //TODO: Update, event
           }.bind(this);
         }
-        if (this.options.htmlResponse) { ajaxOptions.evalScripts = true; }
+        if (this.options.htmlResponse) ajaxOptions.evalScripts = true;
         Object.extend(ajaxOptions, {
           parameters: { editorId: this.element.identify() }
         });
         this._form.request(ajaxOptions);
       }
-      if (event) { event.stop(); }
+      if (event) event.stop();
     },
 
     /**
@@ -170,19 +167,19 @@
       });
       if (!result.stopped) {
         this.stopEditing();
-        if (this._saving) { this._saving = false; }
-        this.element.update(this.element.retrieve("previousContents"));
+        if (this._saving) this._saving = false;
+        this.element.update(this.element.retrieve("ui.ipe.previousContents"));
       }
-      if (event) { event.stop(); }
+      if (event) event.stop();
     },
 
     /**
     **/
     destroy: function() {
       this.removeObservers();
-      if (this._editing) { this.cancel(); }
-      if (Object.isElement(this._form)) { this._form.remove(); }
-      this.element.update(this.element.retrieve("originalContents"));
+      if (this._editing) this.cancel();
+      if (Object.isElement(this._form)) this._form.remove();
+      this.element.update(this.element.retrieve("ui.ipe.originalContents"));
       // TODO: remove classnames, effects, title, and element stored data
     },
 
@@ -199,9 +196,8 @@
     },
 
     _createForm: function () {
-      var form;
-      if (Object.isElement(this._form)) { return; }
-      form = new Element("form", {
+      if (Object.isElement(this._form)) return;
+      var form = new Element("form", {
         id: this.options.formId,
         "class": this.options.formClassName + " ui-widget",
         action: this.url,
@@ -215,30 +211,30 @@
     },
 
     _createEditor: function () {
-      var text = this.getText(), opt = this.options, editor, elementOptions,
+      var text = this.getText(), opt = this.options,
           rows = parseInt(opt.rows, 10), type, afterText;
-      if (opt.loadTextURL) { text = opt.loadingText; }
-      elementOptions = { name: opt.paramName };
+      if (opt.loadTextURL) text = opt.loadingText;
+      var elementOptions = { name: opt.paramName };
       if (rows <= 1 && !/\r|\n/.test(text)) { // INPUT
         type = "INPUT";
         Object.extend(elementOptions, {
-          type : "text",
-          size : opt.size
+          type: "text",
+          size: opt.size
         });
         afterText = "&nbsp";
       } else { // TEXTAREA
         type = "TEXTAREA";
         Object.extend(elementOptions, {
-          rows: rows > 1 ? rows : opt.autoRows,
+          rows: rows > 1 ? rows: opt.autoRows,
           cols: opt.cols
         });
         afterText = "<br />";
       }
-      editor = new Element(type, elementOptions);
+      var editor = new Element(type, elementOptions);
       editor.observe("keydown", this._checkForEscapeOrReturn.bind(this));
       this._editor = editor;
-      if (opt.submitOnBlur) { editor.observe("blur", this.save.bind(this)); }
-      if (opt.loadTextURL) { this._loadExternalText(); }
+      if (opt.submitOnBlur) editor.observe("blur", this.save.bind(this));
+      if (opt.loadTextURL) this._loadExternalText();
       this._form.insert({ top: editor, bottom: afterText });
     },
 
@@ -248,7 +244,7 @@
 
       function insert(item) { form.insert({ bottom: item }); }
 
-      if (this.options.externalControlOnly) { opts = []; }
+      if (this.options.externalControlOnly) opts = [];
       insert(this.options.textBeforeControls);
       opts.each(function (opt, i) {
         var el, control, last = i === opts.length - 1;
@@ -268,26 +264,25 @@
         control.element.observe("click", function (event) {
           var action = opt.action;
           event.stop();
-          if (Object.isFunction(action)) { action(this); }
-          else if (Object.isString(action)) { this[action](event); }
+          if (Object.isFunction(action)) action(this);
+          else if (Object.isString(action)) this[action](event);
         }.bind(this));
         controls.push(control);
         insert(control.element);
-        if (!last) { insert(between); }
+        if (!last) insert(between);
       }, this);
       insert(this.options.textAfterControls);
     },
 
     _checkForEscapeOrReturn: function (event) {
       var e = event;
-      if (!this._editing || e.ctrlKey || e.altKey || e.shiftKey) { return; }
-      if (Event.KEY_ESC === e.keyCode) { this.cancel(e); }
-      else if (Event.KEY_RETURN === e.keyCode) { this.save(e); }
+      if (!this._editing || e.ctrlKey || e.altKey || e.shiftKey) return;
+      if (Event.KEY_ESC === e.keyCode) this.cancel(e);
+      else if (Event.KEY_RETURN === e.keyCode) this.save(e);
     },
 
     _loadExternalText: function () {
-      var options = Object.extend({ method: 'get' }, this.options.ajaxOptions),
-          r;
+      var options = Object.extend({ method: 'get' }, this.options.ajaxOptions);
       this._form.addClassName(this.options.loadingClassName);
       this._editor.setValue(this.options.loadingText).disable();
       Object.extend(options, {
@@ -295,14 +290,14 @@
         onSuccess: function (transport) {
           var text = transport.responseText;
           this._form.removeClassName(this.options.loadingClassName);
-          if (this.options.stripLoadedTextTags) { text = text.stripTags(); }
+          if (this.options.stripLoadedTextTags) text = text.stripTags();
           this.setText(text);
           this._editor.setValue(text).enable();
           this._postProcessEditField();
         }.bind(this),
         onFailure: function () {} // TODO: handle failure
       });
-      r = new Ajax.Request(this.options.loadTextURL, options);
+      new Ajax.Request(this.options.loadTextURL, options);
     },
 
     _postProcessEditField: function () {
@@ -338,7 +333,7 @@
       textAfterControls: '',
       textBeforeControls: '',
       textBetweenControls: '&nbsp;',
-      controls : [
+      controls: [
         {
           type: "button",
           label: "OK",
@@ -358,7 +353,7 @@
       },
       onLeaveHover: function (instance) {
         instance.element.morph("background-color:" +
-          instance.element.retrieve("originalBackground"));
+          instance.element.retrieve("ui.ipe.originalBackground"));
       }
     }
   });
