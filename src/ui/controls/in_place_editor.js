@@ -22,11 +22,7 @@
       this._saving = false;
       this._editor = null; // the input or text area
       this._controls = []; // the buttons and/or links
-      this.observers = {
-        mouseenter: this._mouseenter.bind(this),
-        mouseleave: this._mouseleave.bind(this),
-        click: this._click.bind(this)
-      };
+      this.observers = { click: this._click.bind(this) };
       this.element.store(this.NAME, this);
       this.element.store("ui.ipe.originalBackground",
         S2.CSS.colorFromString(this.element.getStyle("background-color"))
@@ -183,14 +179,6 @@
       // TODO: remove classnames, effects, title, and element stored data
     },
 
-    _mouseenter: function () {
-      this.options.onEnterHover(this);
-    },
-
-    _mouseleave: function () {
-      this.options.onLeaveHover(this);
-    },
-
     _click: function (event) {
        this.edit(event);
     },
@@ -317,11 +305,8 @@
       autoRows: 3,                         // Use when multi-line w/ rows == 1
       clickToEditText: 'Click to edit',
       cols: 40,
-      externalControl: null,               // id|elt
-      externalControlOnly: false,
       fieldPostCreation: 'activate',       // 'activate'|'focus'|false
       formClassName: 'ui-ipe-form',
-      formId: null,                        // id|elt
       highlightColor: '#ffff99',
       htmlResponse: true,
       loadingClassName: 'ui-ipe-loading',
@@ -331,8 +316,6 @@
       savingClassName: 'ui-ipe-saving',
       savingText: 'Saving&hellip;',
       size: 0,
-      stripLoadedTextTags: false,
-      submitOnBlur: false,
       textAfterControls: '',
       textBeforeControls: '',
       textBetweenControls: '&nbsp;',
@@ -349,15 +332,7 @@
           secondary: true,
           action: "cancel"
         }
-      ],
-      onEnterHover: function (instance) {
-        instance.element.morph("background-color:" +
-          instance.options.highlightColor);
-      },
-      onLeaveHover: function (instance) {
-        instance.element.morph("background-color:" +
-          instance.element.retrieve("ui.ipe.originalBackground"));
-      }
+      ]
     }
   });
 
