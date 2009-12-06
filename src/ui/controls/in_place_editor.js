@@ -307,7 +307,6 @@
       cols: 40,
       fieldPostCreation: 'activate',       // 'activate'|'focus'|false
       formClassName: 'ui-ipe-form',
-      highlightColor: '#ffff99',
       htmlResponse: true,
       loadingClassName: 'ui-ipe-loading',
       loadingText: 'Loading&hellip;',
@@ -320,18 +319,8 @@
       textBeforeControls: '',
       textBetweenControls: '&nbsp;',
       controls: [
-        {
-          type: "button",
-          label: "OK",
-          primary: true,
-          action: "save"
-        },
-        {
-          type: "button",
-          label: "Cancel",
-          secondary: true,
-          action: "cancel"
-        }
+        { type: "button", label: "OK", primary: true, action: "save" },
+        { type: "button", label: "Cancel", secondary: true, action: "cancel" }
       ]
     }
   });
