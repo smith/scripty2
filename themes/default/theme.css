@@ -265,6 +265,9 @@
       margin-right: 10px;
     }
 
+/* IN PLACE EDITOR */
+
+.ui-ipe:hover { background-color: #ffff99; }
 
 /* SLIDER */
 
