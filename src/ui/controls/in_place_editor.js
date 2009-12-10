@@ -57,7 +57,14 @@
         this._editor.stopObserving("blur");
         this._editor.stopObserving("keydown");
       }
-      // TODO: stop observing controls
+      // Stop observing controls
+      this._controls.each(function (control) {
+        try {
+          control.stopObserving("click");
+          control.element.stopObserving("click");
+        } catch (e) {} // Control was not a widget or element or something else
+                       // happened
+      });
     },
 
     /**
