@@ -3,12 +3,22 @@
   /** section: scripty2 ui
    *  class S2.UI.InPlaceEditor < S2.UI.Base
    *
+   *
+   *  A class for making elements editable.
+   *
+   *  <h4>Options</h4>
+   *  * TODO
+   *
   **/
   UI.InPlaceEditor = Class.create(UI.Base, {
     NAME: "S2.UI.InPlaceEditor",
 
     /**
-     *  new S2.UI.InPlaceEditor(element, url, options)
+     *  new S2.UI.InPlaceEditor(element, url, [options])
+     *  - element (Element|String): The element or element id to be used for the
+     *    editor.
+     *  - url (String): The URL where requests to save edits wil be sent.
+     *  - options (Object): Additional configuration options.
      *
      *  Instantiates an in place editor.
     **/
@@ -68,20 +78,30 @@
     },
 
     /**
+     * S2.UI.InPlaceEditor#getText() -> String
+     *
+     * Get the text currently being used by the editor as a `String`.
     **/
     getText: function () {
       return this._text.unescapeHTML();
     },
 
     /**
+     * S2.UI.InPlaceEditor#setText(text) -> this
+     *
+     * Changes the text for the editor.
     **/
     setText: function (text) {
       this._text = text;
       this.element.store("ui.ipe.previousContents", text);
-      return text;
+      return this;
    },
 
     /**
+     * S2.UI.InPlaceEditor#edit([event]) -> this
+     * fires ui:ipe:enter
+     *
+     * Send the editor into edit mode.
     **/
     edit: function (event) {
       var externalControl = $(this.options.externalControl);
@@ -101,9 +121,14 @@
       }
 
       if (event) event.stop();
+      return this;
     },
 
     /**
+     * S2.UI.InPlaceEditor#stopEditing([event]) -> this
+     * fires ui:ipe:leave
+     *
+     * Take the editor out of edit mode.
     **/
     stopEditing: function (event) {
       var externalControl = $(this.options.externalControl);
@@ -119,9 +144,15 @@
       }
 
       if (event) event.stop();
+      return this;
     },
 
     /**
+     * S2.UI.InPlaceEditor#save([event]) -> this
+     * fires ui:ipe:before:save
+     * fires ui:ipe:after:save
+     *
+     * Save the text from the editor to the server and leave edit mode.
     **/
     save: function (event) {
       var result = this.element.fire("ui:ipe:before:save", {
@@ -162,9 +193,15 @@
         this._form.request(ajaxOptions);
       }
       if (event) event.stop();
+      return this;
     },
 
     /**
+     * S2.UI.InPlaceEditor#cancel([event]) -> this
+     * fires ui:ipe:cancel
+     *
+     * Take the editor out of edit mode and revert the text back to its previous
+     * contents.
     **/
     cancel: function (event) {
       var result = this.element.fire("ui:ipe:cancel", {
@@ -176,9 +213,14 @@
         this.element.update(this.element.retrieve("ui.ipe.previousContents"));
       }
       if (event) event.stop();
+      return this;
     },
 
     /**
+     * S2.UI.InPlaceEditor#destroy() -> undefined
+     *
+     * Remove all editor components and revert the element back to its original
+     * state.
     **/
     destroy: function() {
       var storage = this.element.getStorage();
