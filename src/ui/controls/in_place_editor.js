@@ -151,6 +151,8 @@
         if (!Object.isFunction(ajaxOptions.onFailure)) {
           ajaxOptions.onFailure = function (transport) {
             //TODO: event
+            alert("Error communicating with server: " +
+              String(transport.responseText).stripTags());
           }.bind(this);
         }
         if (this.options.htmlResponse) ajaxOptions.evalScripts = true;
