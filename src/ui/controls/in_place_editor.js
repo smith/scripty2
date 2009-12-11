@@ -7,7 +7,48 @@
    *  A class for making elements editable.
    *
    *  <h4>Options</h4>
-   *  * TODO
+   *
+   *  * `ajaxOptions` (`Object`): The options to be sent with Ajax requests.
+   *  * `autoRows` (`Number`): If the `element` has multiple lines and the
+   *    `rows` option is set to `1`, this is the number of rows the editor area
+   *    will use. Default is `3`.
+   *  * `clickToEditText`: The text that will be shown as the `title` attribute
+   *    of the `element`. Defaults to `"Click to edit"`.
+   *  * `cols` (`Number`): The number of columns used in a multi-line editor.
+   *    Defaults to `40`.
+   *  * `externalControl` (`Element` | `String`): An `Element` or element id to
+   *    be used as an external control. When the element is clicked the editor
+   *    will go into edit mode.
+   *  * `externalControlOnly` (`Boolean`): Whether or not the editor will only
+   *    have an external control and ignore the `controls` option.
+   *  * `fieldPostCreation` (`String`): The action to apply to the edit field
+   *    when edit mode is entered. Can be `"activate"`, `"focus"`, or `false`.
+   *    Defaults to `"activate"`.
+   *  * `formClassName` (`String`): The CSS class name given to the `form`
+   *    element. Defaults to `"ui-ipe-form"`.
+   *  * `formId` (`String`): The HTML ID or the `form` element.
+   *  * `htmlResponse` (`Boolean`): Whether or not the response from the server
+   *    will be processed as HTML. Defaults to `true`.
+   *  * `paramName` (`String`): The parameter name that contains the value of
+   *    the edit field when sent to the server. Defaults to `"value"`.
+   *  * `rows` (`Number`): The number of rows to be used in a multi-line editor.
+   *    If set to `1` and multi-line, the `autoRows` options will be used.
+   *  * `savingClassName` (`String`): The CSS class given to the element during
+   *    save. Defaults to `"ui-ipe-saving"`.
+   *  * `savingText` (`String`): The text displayed in the element while saving.
+   *    Defaults to `"Saving&hellip;"`
+   *  * `size` (`Number`) : The `size` attribute to use for the edit field. If
+   *    it is `0` the attribute will not be set. Defaults to `0`.
+   *  * `submitOnBlur` (`Boolean`) : If this option is `true` the editor will
+   *    save when the field is blurred. Defaults to `false`.
+   *  * `textAfterControls` (`String`): Text to be displayed after the controls.
+   *  * `textBeforeControls` (`String`): Text to be displayed before the
+   *    controls.
+   *  * `textBetweenControls` (`String`): Text to be displayed between each
+   *    control.
+   *  * `controls` (`Array`): A set of `Object`s that describe the controls
+   *    placed after the edit field. By default an OK and Cancel button are
+   *    used.
    *
   **/
   UI.InPlaceEditor = Class.create(UI.Base, {
